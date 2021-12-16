@@ -18,6 +18,9 @@
 # Modified from https://www.gitignore.io/api/node,linux,windows,webstorm+all,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=node,linux,windows,webstorm+all,visualstudiocode
 
+# for rosbridge and rosvideo
+msgs/
+
 # ROS bags
 *.bag
 

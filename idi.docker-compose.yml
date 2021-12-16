@@ -84,11 +84,13 @@ services:
     # http://wiki.ros.org/rosbridge_suite
     #
     image: isaac_data_interface_rosbridge
-    build: '${IDI_PATH:-.}/rosbridge'
+    build:
+      context: '${IDI_PATH:-.}'
+      dockerfile: '${IDI_PATH:-.}/rosbridge/Dockerfile'
     hostname: rosbridge
     container_name: rosbridge
     entrypoint: '/ros_entrypoint.sh'
-    command: 'roslaunch --wait /rosbridge/publishers.launch'
+    command: 'roslaunch --wait /rosbridge/src/publishers.launch'
     expose:
       - 9090
     environment:
@@ -105,7 +107,9 @@ services:
     # http://wiki.ros.org/web_video_server
     #
     image: isaac_data_interface_rosvideo
-    build: '${IDI_PATH:-.}/rosvideo'
+    build:
+      context: '${IDI_PATH:-.}'
+      dockerfile: '${IDI_PATH:-.}/rosvideo/Dockerfile'
     hostname: rosvideo
     container_name: rosvideo
     entrypoint: '/ros_entrypoint.sh'

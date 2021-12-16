@@ -84,7 +84,7 @@ services:
     hostname: rosbridge
     container_name: rosbridge
     entrypoint: '/ros_entrypoint.sh'
-    command: 'roslaunch --wait /rosbridge/publishers.launch'
+    command: 'roslaunch --wait /rosbridge/src/publishers.launch'
     expose:
       - 9090
     environment:

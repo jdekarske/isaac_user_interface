@@ -25,14 +25,19 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 RUN sudo apt-get update \
   && apt-get install -y apt-utils 2>&1 | grep -v "debconf: delaying package configuration, since apt-utils is not installed" \
   && apt-get install -y \
-    ros-noetic-web-video-server \
-  && rm -rf /var/lib/apt/lists/*
+  ros-noetic-web-video-server \
+  python3-pip
 
-RUN . /opt/ros/noetic/setup.sh \
-  && apt-get update \
-  && rosdep update 2>&1 | egrep -v 'as root|fix-permissions' \
-  && apt-get install -y python3-pip \
-  && rm -rf /var/lib/apt/lists/*
-
-RUN echo "#!/bin/bash\nset -e\n\nsource \"/opt/ros/noetic/setup.bash\"\nexec \"\$@\"" > /ros_entrypoint.sh && \
+RUN echo "#!/bin/bash\nset -e\n\nsource \"/opt/ros/noetic/setup.bash\"\nsource \"/rosvideo/devel/setup.bash\"\nexec \"\$@\"" > /ros_entrypoint.sh && \
   chmod +x /ros_entrypoint.sh
+
+WORKDIR /rosvideo/src
+
+COPY ./msgs/ .
+
+RUN cd .. \
+  && . /opt/ros/noetic/setup.sh \
+  && rosdep update 2>&1 | egrep -v 'as root|fix-permissions' \
+  && rosdep install --from-paths src --ignore-src -y \
+  && catkin_make \
+  && rm -rf /var/lib/apt/lists/*

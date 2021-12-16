@@ -17,24 +17,29 @@
 
 FROM ros:noetic
 
-RUN apt update
-
-RUN apt-get install -y \
-    ros-noetic-joint-state-publisher \
-    ros-noetic-robot-state-publisher \
-    ros-noetic-rosbridge-server \
-    ros-noetic-tf2-ros \
-    ros-noetic-tf2-web-republisher
-
-RUN . /opt/ros/noetic/setup.sh \
-  && apt-get update \
-  && apt-get upgrade -y \
-  && rosdep update 2>&1 | egrep -v 'as root|fix-permissions' \
-  && apt-get install -y python3-pip
+RUN apt-get update \
+  && apt-get install -y \
+  ros-noetic-joint-state-publisher \
+  ros-noetic-robot-state-publisher \
+  ros-noetic-rosbridge-server \
+  ros-noetic-tf2-ros \
+  ros-noetic-tf2-web-republisher \
+  python3-pip
 
 RUN pip install future
-RUN mkdir /rosbridge
-COPY ./publishers.launch ./rosbridge/
 
-RUN echo "#!/bin/bash\nset -e\n\nsource \"/opt/ros/noetic/setup.bash\"\nexec \"\$@\"" > /ros_entrypoint.sh && \
+# set up workspace
+WORKDIR /rosbridge/src
+COPY ./rosbridge/publishers.launch .
+
+RUN echo "#!/bin/bash\nset -e\n\nsource \"/opt/ros/noetic/setup.bash\"\nsource \"/rosbridge/devel/setup.bash\"\nexec \"\$@\"" > /ros_entrypoint.sh && \
   chmod +x /ros_entrypoint.sh
+
+COPY ./msgs/ .
+
+RUN cd .. \
+  && . /opt/ros/noetic/setup.sh \
+  && rosdep update 2>&1 | egrep -v 'as root|fix-permissions' \
+  && rosdep install --from-paths src --ignore-src -y \
+  && catkin_make \
+  && rm -rf /var/lib/apt/lists/*
