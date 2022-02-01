@@ -24,16 +24,14 @@ RUN apt-get update \
   ros-noetic-rosbridge-server \
   ros-noetic-tf2-ros \
   ros-noetic-tf2-web-republisher \
-  python3-pip
+  python3-pip \ 
+  git
 
 RUN pip install future
 
 # set up workspace
 WORKDIR /rosbridge/src
-COPY ./rosbridge/publishers.launch .
-
-RUN echo "#!/bin/bash\nset -e\n\nsource \"/opt/ros/noetic/setup.bash\"\nsource \"/rosbridge/devel/setup.bash\"\nexec \"\$@\"" > /ros_entrypoint.sh && \
-  chmod +x /ros_entrypoint.sh
+RUN git clone -b noetic https://github.com/jdekarske/interactive_marker_proxy.git
 
 COPY ./msgs/ .
 
@@ -43,3 +41,8 @@ RUN cd .. \
   && rosdep install --from-paths src --ignore-src -y \
   && catkin_make \
   && rm -rf /var/lib/apt/lists/*
+  
+COPY ./rosbridge/publishers.launch .
+
+RUN echo "#!/bin/bash\nset -e\n\nsource \"/opt/ros/noetic/setup.bash\"\nsource \"/rosbridge/devel/setup.bash\"\nexec \"\$@\"" > /ros_entrypoint.sh && \
+  chmod +x /ros_entrypoint.sh
